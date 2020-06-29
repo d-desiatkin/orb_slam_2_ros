@@ -22,12 +22,11 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
-#include <string>
-#include <thread>
+#include<string>
+#include<thread>
 #include <unistd.h>
-#include <opencv2/core/core.hpp>
+#include<opencv2/core/core.hpp>
 #include <sys/resource.h>
-
 
 #include "Tracking.h"
 #include "FrameDrawer.h"
@@ -45,8 +44,6 @@ class Tracking;
 class LocalMapping;
 class LoopClosing;
 
-struct ORBParameters;
-
 class System
 {
 public:
@@ -60,10 +57,10 @@ public:
 public:
 
     // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and Viewer threads.
-    System(const string strVocFile, const eSensor sensor, ORBParameters& parameters,
+    System(const string strVocFile, const string strSettingsFile, const eSensor sensor,
            const std::string & map_file = "", bool load_map = false); // map serialization addition
 
-    // Process the given stereo frame. Images must be synchronized and rectified.
+    // Proccess the given stereo frame. Images must be synchronized and rectified.
     // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to grayscale.
     // Returns the camera pose (empty if tracking fails).
     void TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp);
@@ -74,7 +71,7 @@ public:
     // Returns the camera pose (empty if tracking fails).
     void TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const double &timestamp);
 
-    // Process the given monocular frame
+    // Proccess the given monocular frame
     // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to grayscale.
     // Returns the camera pose (empty if tracking fails).
     void TrackMonocular(const cv::Mat &im, const double &timestamp);
@@ -199,7 +196,6 @@ private:
 
     // Current position
     cv::Mat current_position_;
-
 };
 
 }// namespace ORB_SLAM

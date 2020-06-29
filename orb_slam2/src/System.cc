@@ -28,7 +28,7 @@
 namespace ORB_SLAM2
 {
 
-System::System(const string strVocFile, const eSensor sensor, ORBParameters& parameters,
+System::System(const string strVocFile, const string strSettingsFile, const eSensor sensor,
                const std::string & map_file, bool load_map): // map serialization addition
                mSensor(sensor), mbReset(false),mbActivateLocalizationMode(false), mbDeactivateLocalizationMode(false),
                map_file(map_file), load_map(load_map)
@@ -40,11 +40,6 @@ System::System(const string strVocFile, const eSensor sensor, ORBParameters& par
     "This is free software, and you are welcome to redistribute it" << endl <<
     "under certain conditions. See LICENSE.txt." << endl << endl;
 
-    cout << "OpenCV version : " << CV_VERSION << endl;
-    cout << "Major version : " << CV_MAJOR_VERSION << endl;
-    cout << "Minor version : " << CV_MINOR_VERSION << endl;
-    cout << "Subminor version : " << CV_SUBMINOR_VERSION << endl;
-
     cout << "Input sensor was set to: ";
 
     if(mSensor==MONOCULAR)
@@ -53,6 +48,15 @@ System::System(const string strVocFile, const eSensor sensor, ORBParameters& par
         cout << "Stereo" << endl;
     else if(mSensor==RGBD)
         cout << "RGB-D" << endl;
+
+    //Check settings file
+    cv::FileStorage fsSettings(strSettingsFile.c_str(), cv::FileStorage::READ);
+    if(!fsSettings.isOpened())
+    {
+       cerr << "Failed to open settings file at: " << strSettingsFile << endl;
+       exit(-1);
+    }
+
 
     //Load ORB Vocabulary
     cout << endl << "Loading ORB Vocabulary." << endl;
@@ -99,7 +103,7 @@ System::System(const string strVocFile, const eSensor sensor, ORBParameters& par
     //Initialize the Tracking thread
     //(it will live in the main thread of execution, the one that called this constructor)
     mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer,
-                             mpMap, mpKeyFrameDatabase, mSensor, parameters);
+                             mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor);
 
     //Initialize the Local Mapping thread and launch
     mpLocalMapper = new LocalMapping(mpMap, mSensor==MONOCULAR);

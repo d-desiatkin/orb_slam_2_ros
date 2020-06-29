@@ -26,6 +26,8 @@
 #include <ros/time.h>
 #include <image_transport/image_transport.h>
 #include <tf/transform_broadcaster.h>
+#include <tf/transform_listener.h>
+#include <tf2_ros/transform_listener.h>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/core/core.hpp>
 
@@ -40,7 +42,6 @@
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <sensor_msgs/CameraInfo.h>
 
 #include "System.h"
 
@@ -51,14 +52,12 @@ class Node
   public:
     Node (ORB_SLAM2::System::eSensor sensor, ros::NodeHandle &node_handle, image_transport::ImageTransport &image_transport);
     ~Node ();
-    void Init ();
 
   protected:
     void Update ();
     ORB_SLAM2::System* orb_slam_;
-    ros::Time current_frame_time_;
 
-    std::string camera_info_topic_;
+    ros::Time current_frame_time_;
 
   private:
     void PublishMapPoints (std::vector<ORB_SLAM2::MapPoint*> map_points);
@@ -67,7 +66,6 @@ class Node
     void PublishRenderedImage (cv::Mat image);
     void ParamsChangedCallback(orb_slam2_ros::dynamic_reconfigureConfig &config, uint32_t level);
     bool SaveMapSrv (orb_slam2_ros::SaveMap::Request &req, orb_slam2_ros::SaveMap::Response &res);
-    void LoadOrbParameters (ORB_SLAM2::ORBParameters& parameters);
 
     tf::Transform TransformFromMat (cv::Mat position_mat);
     sensor_msgs::PointCloud2 MapPointsToPointCloud (std::vector<ORB_SLAM2::MapPoint*> map_points);
@@ -77,22 +75,21 @@ class Node
     image_transport::Publisher rendered_image_publisher_;
     ros::Publisher map_points_publisher_;
     ros::Publisher pose_publisher_;
+    tf::TransformListener listener_;
 
     ros::ServiceServer service_server_;
 
     std::string name_of_node_;
     ros::NodeHandle node_handle_;
-    image_transport::ImageTransport image_transport_;
-
-    ORB_SLAM2::System::eSensor sensor_;
 
     std::string map_frame_id_param_;
     std::string camera_frame_id_param_;
+    std::string base_frame_id_param_;
     std::string map_file_name_param_;
     std::string voc_file_name_param_;
+    std::string settings_file_name_param_;
     bool load_map_param_;
     bool publish_pointcloud_param_;
-    bool publish_tf_param_;
     bool publish_pose_param_;
     int min_observations_per_point_;
 };
